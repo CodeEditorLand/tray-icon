@@ -1,5 +1,13 @@
 # Changelog
 
+## \[0.14.2]
+
+- [`f1f3adb`](https://www.github.com/tauri-apps/tray-icon/commit/f1f3adb5ec726335226ab8ec1d8c6c41012cb9c5)([#166](https://www.github.com/tauri-apps/tray-icon/pull/166)) Switch from `dirs_next` to `dirs` as `dirs_next` is now unmaintained while `dirs` is
+
+## \[0.14.1]
+
+- [`b491c98`](https://www.github.com/tauri-apps/tray-icon/commit/b491c9886619d3a26876476b078d99a0ae788918)([#164](https://www.github.com/tauri-apps/tray-icon/pull/164)) Fix tray icon rect scaled by dpi on Windows
+
 ## \[0.14.0]
 
 - [`587292b`](https://www.github.com/tauri-apps/tray-icon/commit/587292b2e7bfbebdd2677c51b34c6362730d5111)([#161](https://www.github.com/tauri-apps/tray-icon/pull/161)) This release contains **breaking change** to the event structs in order to be able to add new `Enter`, `Move` and `Leave` events:
