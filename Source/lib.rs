@@ -147,7 +147,7 @@ pub struct TrayIconAttributes {
     /// Use the icon as a [template](https://developer.apple.com/documentation/appkit/nsimage/1520017-template?language=objc). **macOS only**.
     pub icon_is_template: bool,
 
-    /// Whether to show the tray menu on left click or not, default is `true`. **macOS only**.
+    /// Whether to show the tray menu on left click or not, default is `true`. **macOS & Windows only**.
     pub menu_on_left_click: bool,
 
     /// Tray icon title.
@@ -428,6 +428,17 @@ pub enum TrayIconEvent {
         /// Mouse button state when this event was triggered.
         button_state: MouseButtonState,
     },
+    /// A double click happened on the tray icon. **Windows Only**
+    DoubleClick {
+        /// Id of the tray icon which triggered this event.
+        id: TrayIconId,
+        /// Physical Position of this event.
+        position: dpi::PhysicalPosition<f64>,
+        /// Position and size of the tray icon.
+        rect: Rect,
+        /// Mouse button that triggered this event.
+        button: MouseButton,
+    },
     /// The mouse entered the tray icon region.
     Enter {
         /// Id of the tray icon which triggered this event.
@@ -515,6 +526,7 @@ impl TrayIconEvent {
     pub fn id(&self) -> &TrayIconId {
         match self {
             TrayIconEvent::Click { id, .. } => id,
+            TrayIconEvent::DoubleClick { id, .. } => id,
             TrayIconEvent::Enter { id, .. } => id,
             TrayIconEvent::Move { id, .. } => id,
             TrayIconEvent::Leave { id, .. } => id,
