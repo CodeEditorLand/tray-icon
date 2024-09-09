@@ -6,80 +6,80 @@ use std::{convert::Infallible, str::FromStr};
 pub struct TrayIconId(pub String);
 
 impl TrayIconId {
-	/// Create a new tray icon id.
-	pub fn new<S: AsRef<str>>(id: S) -> Self {
-		Self(id.as_ref().to_string())
-	}
+    /// Create a new tray icon id.
+    pub fn new<S: AsRef<str>>(id: S) -> Self {
+        Self(id.as_ref().to_string())
+    }
 }
 
 impl AsRef<str> for TrayIconId {
-	fn as_ref(&self) -> &str {
-		self.0.as_ref()
-	}
+    fn as_ref(&self) -> &str {
+        self.0.as_ref()
+    }
 }
 
 impl<T: ToString> From<T> for TrayIconId {
-	fn from(value: T) -> Self {
-		Self::new(value.to_string())
-	}
+    fn from(value: T) -> Self {
+        Self::new(value.to_string())
+    }
 }
 
 impl FromStr for TrayIconId {
-	type Err = Infallible;
+    type Err = Infallible;
 
-	fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-		Ok(Self::new(s))
-	}
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        Ok(Self::new(s))
+    }
 }
 
 impl PartialEq<&str> for TrayIconId {
-	fn eq(&self, other: &&str) -> bool {
-		self.0 == *other
-	}
+    fn eq(&self, other: &&str) -> bool {
+        self.0 == *other
+    }
 }
 
 impl PartialEq<&str> for &TrayIconId {
-	fn eq(&self, other: &&str) -> bool {
-		self.0 == *other
-	}
+    fn eq(&self, other: &&str) -> bool {
+        self.0 == *other
+    }
 }
 
 impl PartialEq<String> for TrayIconId {
-	fn eq(&self, other: &String) -> bool {
-		self.0 == *other
-	}
+    fn eq(&self, other: &String) -> bool {
+        self.0 == *other
+    }
 }
 
 impl PartialEq<String> for &TrayIconId {
-	fn eq(&self, other: &String) -> bool {
-		self.0 == *other
-	}
+    fn eq(&self, other: &String) -> bool {
+        self.0 == *other
+    }
 }
 
 impl PartialEq<&String> for TrayIconId {
-	fn eq(&self, other: &&String) -> bool {
-		self.0 == **other
-	}
+    fn eq(&self, other: &&String) -> bool {
+        self.0 == **other
+    }
 }
 
 impl PartialEq<&TrayIconId> for TrayIconId {
-	fn eq(&self, other: &&TrayIconId) -> bool {
-		other.0 == self.0
-	}
+    fn eq(&self, other: &&TrayIconId) -> bool {
+        other.0 == self.0
+    }
 }
 
 #[cfg(test)]
 mod test {
-	use crate::TrayIconId;
+    use crate::TrayIconId;
 
-	#[test]
-	fn is_eq() {
-		assert_eq!(TrayIconId::new("t"), "t",);
-		assert_eq!(TrayIconId::new("t"), String::from("t"));
-		assert_eq!(TrayIconId::new("t"), &String::from("t"));
-		assert_eq!(TrayIconId::new("t"), TrayIconId::new("t"));
-		assert_eq!(TrayIconId::new("t"), &TrayIconId::new("t"));
-		assert_eq!(&TrayIconId::new("t"), &TrayIconId::new("t"));
-		assert_eq!(TrayIconId::new("t").as_ref(), "t");
-	}
+    #[test]
+    fn is_eq() {
+        assert_eq!(TrayIconId::new("t"), "t",);
+        assert_eq!(TrayIconId::new("t"), String::from("t"));
+        assert_eq!(TrayIconId::new("t"), &String::from("t"));
+        assert_eq!(TrayIconId::new("t"), TrayIconId::new("t"));
+        assert_eq!(TrayIconId::new("t"), &TrayIconId::new("t"));
+        assert_eq!(&TrayIconId::new("t"), &TrayIconId::new("t"));
+        assert_eq!(TrayIconId::new("t").as_ref(), "t");
+    }
 }
