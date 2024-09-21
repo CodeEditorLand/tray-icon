@@ -8,13 +8,13 @@ use thiserror::Error;
 #[non_exhaustive]
 #[derive(Error, Debug)]
 pub enum Error {
-    #[error(transparent)]
-    OsError(#[from] std::io::Error),
-    #[cfg(any(target_os = "linux", target_os = "macos"))]
-    #[error(transparent)]
-    PngEncodingError(#[from] png::EncodingError),
-    #[error("not on the main thread")]
-    NotMainThread,
+	#[error(transparent)]
+	OsError(#[from] std::io::Error),
+	#[cfg(any(target_os = "linux", target_os = "macos"))]
+	#[error(transparent)]
+	PngEncodingError(#[from] png::EncodingError),
+	#[error("not on the main thread")]
+	NotMainThread,
 }
 
 /// Convenient type alias of Result type for tray-icon.
