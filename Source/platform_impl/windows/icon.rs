@@ -31,12 +31,8 @@ impl RgbaIcon {
 		let rgba = self.rgba;
 		let pixel_count = rgba.len() / PIXEL_SIZE;
 		let mut and_mask = Vec::with_capacity(pixel_count);
-		let pixels = unsafe {
-			std::slice::from_raw_parts_mut(
-				rgba.as_ptr() as *mut Pixel,
-				pixel_count,
-			)
-		};
+		let pixels =
+			unsafe { std::slice::from_raw_parts_mut(rgba.as_ptr() as *mut Pixel, pixel_count) };
 		for pixel in pixels {
 			and_mask.push(pixel.a.wrapping_sub(u8::MAX)); // invert alpha channel
 			pixel.convert_to_bgra();
@@ -76,11 +72,7 @@ unsafe impl Send for WinIcon {}
 impl WinIcon {
 	pub fn as_raw_handle(&self) -> HICON { self.inner.handle }
 
-	pub fn from_rgba(
-		rgba:Vec<u8>,
-		width:u32,
-		height:u32,
-	) -> Result<Self, BadIcon> {
+	pub fn from_rgba(rgba:Vec<u8>, width:u32, height:u32) -> Result<Self, BadIcon> {
 		let rgba_icon = RgbaIcon::from_rgba(rgba, width, height)?;
 		rgba_icon.into_windows_icon()
 	}
@@ -119,10 +111,7 @@ impl WinIcon {
 		}
 	}
 
-	fn from_resource_inner_name(
-		name:PCWSTR,
-		size:Option<(u32, u32)>,
-	) -> Result<Self, BadIcon> {
+	fn from_resource_inner_name(name:PCWSTR, size:Option<(u32, u32)>) -> Result<Self, BadIcon> {
 		// width / height of 0 along with LR_DEFAULTSIZE tells windows to load
 		// the default icon size
 		let (width, height) = size.unwrap_or((0, 0));
@@ -143,10 +132,7 @@ impl WinIcon {
 		}
 	}
 
-	pub(crate) fn from_resource(
-		resource_id:u16,
-		size:Option<(u32, u32)>,
-	) -> Result<Self, BadIcon> {
+	pub(crate) fn from_resource(resource_id:u16, size:Option<(u32, u32)>) -> Result<Self, BadIcon> {
 		Self::from_resource_inner_name(resource_id as PCWSTR, size)
 	}
 

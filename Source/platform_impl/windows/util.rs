@@ -51,50 +51,31 @@ pub fn get_instance_handle() -> windows_sys::Win32::Foundation::HMODULE {
 	// DLLs: https://stackoverflow.com/questions/21718027/getmodulehandlenull-vs-hinstance
 
 	extern {
-		static __ImageBase:
-			windows_sys::Win32::System::SystemServices::IMAGE_DOS_HEADER;
+		static __ImageBase: windows_sys::Win32::System::SystemServices::IMAGE_DOS_HEADER;
 	}
 
 	unsafe { &__ImageBase as *const _ as _ }
 }
 
 #[inline(always)]
-pub unsafe fn get_window_long(
-	hwnd:HWND,
-	nindex:WINDOW_LONG_PTR_INDEX,
-) -> isize {
+pub unsafe fn get_window_long(hwnd:HWND, nindex:WINDOW_LONG_PTR_INDEX) -> isize {
 	#[cfg(target_pointer_width = "64")]
-	return unsafe {
-		windows_sys::Win32::UI::WindowsAndMessaging::GetWindowLongPtrW(
-			hwnd, nindex,
-		)
-	};
+	return unsafe { windows_sys::Win32::UI::WindowsAndMessaging::GetWindowLongPtrW(hwnd, nindex) };
 	#[cfg(target_pointer_width = "32")]
 	return unsafe {
-		windows_sys::Win32::UI::WindowsAndMessaging::GetWindowLongW(
-			hwnd, nindex,
-		) as isize
+		windows_sys::Win32::UI::WindowsAndMessaging::GetWindowLongW(hwnd, nindex) as isize
 	};
 }
 
 #[inline(always)]
-pub unsafe fn set_window_long(
-	hwnd:HWND,
-	nindex:WINDOW_LONG_PTR_INDEX,
-	dwnewlong:isize,
-) -> isize {
+pub unsafe fn set_window_long(hwnd:HWND, nindex:WINDOW_LONG_PTR_INDEX, dwnewlong:isize) -> isize {
 	#[cfg(target_pointer_width = "64")]
 	return unsafe {
-		windows_sys::Win32::UI::WindowsAndMessaging::SetWindowLongPtrW(
-			hwnd, nindex, dwnewlong,
-		)
+		windows_sys::Win32::UI::WindowsAndMessaging::SetWindowLongPtrW(hwnd, nindex, dwnewlong)
 	};
 	#[cfg(target_pointer_width = "32")]
 	return unsafe {
-		windows_sys::Win32::UI::WindowsAndMessaging::SetWindowLongW(
-			hwnd,
-			nindex,
-			dwnewlong as i32,
-		) as isize
+		windows_sys::Win32::UI::WindowsAndMessaging::SetWindowLongW(hwnd, nindex, dwnewlong as i32)
+			as isize
 	};
 }

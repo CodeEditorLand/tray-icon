@@ -28,15 +28,7 @@ use objc2_app_kit::{
 	NSView,
 	NSWindow,
 };
-use objc2_foundation::{
-	CGPoint,
-	CGRect,
-	CGSize,
-	MainThreadMarker,
-	NSData,
-	NSSize,
-	NSString,
-};
+use objc2_foundation::{CGPoint, CGRect, CGSize, MainThreadMarker, NSData, NSSize, NSString};
 
 pub(crate) use self::icon::PlatformIcon;
 use crate::{
@@ -81,8 +73,7 @@ impl TrayIcon {
 		mtm:MainThreadMarker,
 	) -> crate::Result<(Retained<NSStatusItem>, Retained<TrayTarget>)> {
 		let ns_status_item = unsafe {
-			NSStatusBar::systemStatusBar()
-				.statusItemWithLength(NSVariableStatusItemLength)
+			NSStatusBar::systemStatusBar().statusItemWithLength(NSVariableStatusItemLength)
 		};
 
 		set_icon_for_ns_status_item_button(
@@ -94,8 +85,7 @@ impl TrayIcon {
 
 		if let Some(menu) = &attrs.menu {
 			unsafe {
-				ns_status_item
-					.setMenu((menu.ns_menu() as *const NSMenu).as_ref());
+				ns_status_item.setMenu((menu.ns_menu() as *const NSMenu).as_ref());
 			}
 		}
 
@@ -109,9 +99,12 @@ impl TrayIcon {
 
 			let target = mtm.alloc().set_ivars(TrayTargetIvars {
 				id:NSString::from_str(&id.0),
-				menu:RefCell::new(attrs.menu.as_deref().and_then(|menu| {
-					Retained::retain(menu.ns_menu().cast::<NSMenu>())
-				})),
+				menu:RefCell::new(
+					attrs
+						.menu
+						.as_deref()
+						.and_then(|menu| Retained::retain(menu.ns_menu().cast::<NSMenu>())),
+				),
 				status_item:ns_status_item.retain(),
 				menu_on_left_click:Cell::new(attrs.menu_on_left_click),
 			});
@@ -128,8 +121,7 @@ impl TrayIcon {
 	}
 
 	fn remove(&mut self) {
-		if let (Some(ns_status_item), Some(tray_target)) =
-			(&self.ns_status_item, &self.tray_target)
+		if let (Some(ns_status_item), Some(tray_target)) = (&self.ns_status_item, &self.tray_target)
 		{
 			unsafe {
 				NSStatusBar::systemStatusBar().removeStatusItem(ns_status_item);
@@ -142,15 +134,9 @@ impl TrayIcon {
 	}
 
 	pub fn set_icon(&mut self, icon:Option<Icon>) -> crate::Result<()> {
-		if let (Some(ns_status_item), Some(tray_target)) =
-			(&self.ns_status_item, &self.tray_target)
+		if let (Some(ns_status_item), Some(tray_target)) = (&self.ns_status_item, &self.tray_target)
 		{
-			set_icon_for_ns_status_item_button(
-				ns_status_item,
-				icon.clone(),
-				false,
-				self.mtm,
-			)?;
+			set_icon_for_ns_status_item_button(ns_status_item, icon.clone(), false, self.mtm)?;
 			tray_target.update_dimensions();
 		}
 		self.attrs.icon = icon;
@@ -158,8 +144,7 @@ impl TrayIcon {
 	}
 
 	pub fn set_menu(&mut self, menu:Option<Box<dyn menu::ContextMenu>>) {
-		if let (Some(ns_status_item), Some(tray_target)) =
-			(&self.ns_status_item, &self.tray_target)
+		if let (Some(ns_status_item), Some(tray_target)) = (&self.ns_status_item, &self.tray_target)
 		{
 			unsafe {
 				let menu = menu
@@ -177,13 +162,9 @@ impl TrayIcon {
 		self.attrs.menu = menu;
 	}
 
-	pub fn set_tooltip<S:AsRef<str>>(
-		&mut self,
-		tooltip:Option<S>,
-	) -> crate::Result<()> {
+	pub fn set_tooltip<S:AsRef<str>>(&mut self, tooltip:Option<S>) -> crate::Result<()> {
 		let tooltip = tooltip.map(|s| s.as_ref().to_string());
-		if let (Some(ns_status_item), Some(tray_target)) =
-			(&self.ns_status_item, &self.tray_target)
+		if let (Some(ns_status_item), Some(tray_target)) = (&self.ns_status_item, &self.tray_target)
 		{
 			Self::set_tooltip_inner(ns_status_item, tooltip.clone(), self.mtm)?;
 			tray_target.update_dimensions();
@@ -198,8 +179,7 @@ impl TrayIcon {
 		mtm:MainThreadMarker,
 	) -> crate::Result<()> {
 		unsafe {
-			let tooltip =
-				tooltip.map(|tooltip| NSString::from_str(tooltip.as_ref()));
+			let tooltip = tooltip.map(|tooltip| NSString::from_str(tooltip.as_ref()));
 			if let Some(button) = ns_status_item.button(mtm) {
 				button.setToolTip(tooltip.as_deref());
 			}
@@ -209,8 +189,7 @@ impl TrayIcon {
 
 	pub fn set_title<S:AsRef<str>>(&mut self, title:Option<S>) {
 		let title = title.map(|s| s.as_ref().to_string());
-		if let (Some(ns_status_item), Some(tray_target)) =
-			(&self.ns_status_item, &self.tray_target)
+		if let (Some(ns_status_item), Some(tray_target)) = (&self.ns_status_item, &self.tray_target)
 		{
 			Self::set_title_inner(ns_status_item, title.clone(), self.mtm);
 			tray_target.update_dimensions();
@@ -235,8 +214,7 @@ impl TrayIcon {
 	pub fn set_visible(&mut self, visible:bool) -> crate::Result<()> {
 		if visible {
 			if self.ns_status_item.is_none() {
-				let (ns_status_item, tray_target) =
-					Self::create(&self.id, &self.attrs, self.mtm)?;
+				let (ns_status_item, tray_target) = Self::create(&self.id, &self.attrs, self.mtm)?;
 				self.ns_status_item = Some(ns_status_item);
 				self.tray_target = Some(tray_target);
 			}
@@ -301,8 +279,7 @@ fn set_icon_for_ns_status_item_button(
 			// build our icon
 			let nsdata = NSData::from_vec(png_icon);
 
-			let nsimage =
-				NSImage::initWithData(NSImage::alloc(), &nsdata).unwrap();
+			let nsimage = NSImage::initWithData(NSImage::alloc(), &nsdata).unwrap();
 			let new_size = NSSize::new(icon_width, icon_height);
 
 			button.setImage(Some(&nsimage));
@@ -500,9 +477,7 @@ fn on_tray_click(this:&TrayTarget, button:MouseButton) {
 		let ns_button = this.ivars().status_item.button(mtm).unwrap();
 
 		let menu_on_left_click = this.ivars().menu_on_left_click.get();
-		if button == MouseButton::Right
-			|| (menu_on_left_click && button == MouseButton::Left)
-		{
+		if button == MouseButton::Right || (menu_on_left_click && button == MouseButton::Left) {
 			let has_items = if let Some(menu) = &*this.ivars().menu.borrow() {
 				menu.numberOfItems() > 0
 			} else {
@@ -569,25 +544,13 @@ fn send_mouse_event(
 				}
 			},
 			MouseEventType::Enter => {
-				TrayIconEvent::Enter {
-					id:tray_id,
-					position:cursor_position,
-					rect:icon_rect,
-				}
+				TrayIconEvent::Enter { id:tray_id, position:cursor_position, rect:icon_rect }
 			},
 			MouseEventType::Leave => {
-				TrayIconEvent::Leave {
-					id:tray_id,
-					position:cursor_position,
-					rect:icon_rect,
-				}
+				TrayIconEvent::Leave { id:tray_id, position:cursor_position, rect:icon_rect }
 			},
 			MouseEventType::Move => {
-				TrayIconEvent::Move {
-					id:tray_id,
-					position:cursor_position,
-					rect:icon_rect,
-				}
+				TrayIconEvent::Move { id:tray_id, position:cursor_position, rect:icon_rect }
 			},
 		};
 
@@ -620,6 +583,4 @@ struct MouseClickEvent {
 ///
 /// This conversion happens to be symmetric, so we only need this one function
 /// to convert between the two coordinate systems.
-fn flip_window_screen_coordinates(y:f64) -> f64 {
-	CGDisplay::main().pixels_high() as f64 - y
-}
+fn flip_window_screen_coordinates(y:f64) -> f64 { CGDisplay::main().pixels_high() as f64 - y }

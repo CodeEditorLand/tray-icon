@@ -46,9 +46,7 @@ fn main() {
 			std::time::Instant::now() + std::time::Duration::from_millis(16),
 		);
 
-		if let tao::event::Event::NewEvents(tao::event::StartCause::Init) =
-			event
-		{
+		if let tao::event::Event::NewEvents(tao::event::StartCause::Init) = event {
 			let icon = load_icon(std::path::Path::new(path));
 
 			// We create the icon once the event loop is actually running
@@ -67,10 +65,7 @@ fn main() {
 			// core-foundation directly.
 			#[cfg(target_os = "macos")]
 			unsafe {
-				use core_foundation::runloop::{
-					CFRunLoopGetMain,
-					CFRunLoopWakeUp,
-				};
+				use core_foundation::runloop::{CFRunLoopGetMain, CFRunLoopWakeUp};
 
 				let rl = CFRunLoopGetMain();
 				CFRunLoopWakeUp(rl);
@@ -93,12 +88,10 @@ fn main() {
 
 fn load_icon(path:&std::path::Path) -> tray_icon::Icon {
 	let (icon_rgba, icon_width, icon_height) = {
-		let image =
-			image::open(path).expect("Failed to open icon path").into_rgba8();
+		let image = image::open(path).expect("Failed to open icon path").into_rgba8();
 		let (width, height) = image.dimensions();
 		let rgba = image.into_raw();
 		(rgba, width, height)
 	};
-	tray_icon::Icon::from_rgba(icon_rgba, icon_width, icon_height)
-		.expect("Failed to open icon")
+	tray_icon::Icon::from_rgba(icon_rgba, icon_width, icon_height).expect("Failed to open icon")
 }

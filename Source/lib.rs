@@ -166,9 +166,9 @@ pub struct TrayIconAttributes {
 	///
 	/// - **Linux:** The title will not be shown unless there is an icon as
 	///   well.  The title is useful for numerical and other frequently updated
-	///   information.  In general, it shouldn't be shown unless a user
-	///   requests it as it can take up a significant amount of space on the
-	///   user's panel.  This may not be shown in all visualizations.
+	///   information.  In general, it shouldn't be shown unless a user requests
+	///   it as it can take up a significant amount of space on the user's
+	///   panel.  This may not be shown in all visualizations.
 	/// - **Windows:** Unsupported.
 	pub title:Option<String>,
 }
@@ -199,10 +199,7 @@ impl TrayIconBuilder {
 	///
 	/// See [`TrayIcon::new`] for more info.
 	pub fn new() -> Self {
-		Self {
-			id:TrayIconId(COUNTER.next().to_string()),
-			attrs:TrayIconAttributes::default(),
-		}
+		Self { id:TrayIconId(COUNTER.next().to_string()), attrs:TrayIconAttributes::default() }
 	}
 
 	/// Sets the unique id to build the tray icon with.
@@ -285,9 +282,7 @@ impl TrayIconBuilder {
 	pub fn id(&self) -> &TrayIconId { &self.id }
 
 	/// Builds and adds a new [`TrayIcon`] to the system tray.
-	pub fn build(self) -> Result<TrayIcon> {
-		TrayIcon::with_id(self.id, self.attrs)
-	}
+	pub fn build(self) -> Result<TrayIcon> { TrayIcon::with_id(self.id, self.attrs) }
 }
 
 /// Tray icon struct and associated methods.
@@ -310,10 +305,7 @@ impl TrayIcon {
 	pub fn new(attrs:TrayIconAttributes) -> Result<Self> {
 		let id = TrayIconId(COUNTER.next().to_string());
 		Ok(Self {
-			tray:Rc::new(RefCell::new(platform_impl::TrayIcon::new(
-				id.clone(),
-				attrs,
-			)?)),
+			tray:Rc::new(RefCell::new(platform_impl::TrayIcon::new(id.clone(), attrs)?)),
 			id,
 		})
 	}
@@ -322,16 +314,10 @@ impl TrayIcon {
 	/// Id.
 	///
 	/// See [`TrayIcon::new`] for more info.
-	pub fn with_id<I:Into<TrayIconId>>(
-		id:I,
-		attrs:TrayIconAttributes,
-	) -> Result<Self> {
+	pub fn with_id<I:Into<TrayIconId>>(id:I, attrs:TrayIconAttributes) -> Result<Self> {
 		let id = id.into();
 		Ok(Self {
-			tray:Rc::new(RefCell::new(platform_impl::TrayIcon::new(
-				id.clone(),
-				attrs,
-			)?)),
+			tray:Rc::new(RefCell::new(platform_impl::TrayIcon::new(id.clone(), attrs)?)),
 			id,
 		})
 	}
@@ -517,10 +503,7 @@ pub struct Rect {
 
 impl Default for Rect {
 	fn default() -> Self {
-		Self {
-			size:dpi::PhysicalSize::new(0, 0),
-			position:dpi::PhysicalPosition::new(0., 0.),
-		}
+		Self { size:dpi::PhysicalSize::new(0, 0), position:dpi::PhysicalPosition::new(0., 0.) }
 	}
 }
 
@@ -528,10 +511,8 @@ impl Default for Rect {
 pub type TrayIconEventReceiver = Receiver<TrayIconEvent>;
 type TrayIconEventHandler = Box<dyn Fn(TrayIconEvent) + Send + Sync + 'static>;
 
-static TRAY_CHANNEL:Lazy<(Sender<TrayIconEvent>, TrayIconEventReceiver)> =
-	Lazy::new(unbounded);
-static TRAY_EVENT_HANDLER:OnceCell<Option<TrayIconEventHandler>> =
-	OnceCell::new();
+static TRAY_CHANNEL:Lazy<(Sender<TrayIconEvent>, TrayIconEventReceiver)> = Lazy::new(unbounded);
+static TRAY_EVENT_HANDLER:OnceCell<Option<TrayIconEventHandler>> = OnceCell::new();
 
 impl TrayIconEvent {
 	/// Returns the id of the tray icon which triggered this event.
@@ -562,9 +543,7 @@ impl TrayIconEvent {
 	/// Calling this function with a `Some` value,
 	/// will not send new events to the channel associated with
 	/// [`TrayIconEvent::receiver`]
-	pub fn set_event_handler<F:Fn(TrayIconEvent) + Send + Sync + 'static>(
-		f:Option<F>,
-	) {
+	pub fn set_event_handler<F:Fn(TrayIconEvent) + Send + Sync + 'static>(f:Option<F>) {
 		if let Some(f) = f {
 			let _ = TRAY_EVENT_HANDLER.set(Some(Box::new(f)));
 		} else {

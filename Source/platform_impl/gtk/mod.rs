@@ -20,16 +20,12 @@ pub struct TrayIcon {
 }
 
 impl TrayIcon {
-	pub fn new(
-		_id:TrayIconId,
-		attrs:TrayIconAttributes,
-	) -> crate::Result<Self> {
+	pub fn new(_id:TrayIconId, attrs:TrayIconAttributes) -> crate::Result<Self> {
 		let id = COUNTER.next();
 		let mut indicator = AppIndicator::new("tray-icon tray app", "");
 		indicator.set_status(AppIndicatorStatus::Active);
 
-		let (parent_path, icon_path) =
-			temp_icon_path(attrs.temp_dir_path.as_ref(), id, 0)?;
+		let (parent_path, icon_path) = temp_icon_path(attrs.temp_dir_path.as_ref(), id, 0)?;
 
 		if let Some(icon) = attrs.icon {
 			icon.inner.write_to_png(&icon_path)?;
@@ -82,16 +78,10 @@ impl TrayIcon {
 		self.menu = menu;
 	}
 
-	pub fn set_tooltip<S:AsRef<str>>(
-		&mut self,
-		_tooltip:Option<S>,
-	) -> crate::Result<()> {
-		Ok(())
-	}
+	pub fn set_tooltip<S:AsRef<str>>(&mut self, _tooltip:Option<S>) -> crate::Result<()> { Ok(()) }
 
 	pub fn set_title<S:AsRef<str>>(&mut self, title:Option<S>) {
-		self.indicator
-			.set_label(title.as_ref().map(|t| t.as_ref()).unwrap_or(""), "");
+		self.indicator.set_label(title.as_ref().map(|t| t.as_ref()).unwrap_or(""), "");
 	}
 
 	pub fn set_visible(&mut self, visible:bool) -> crate::Result<()> {
@@ -129,16 +119,11 @@ fn temp_icon_path(
 ) -> std::io::Result<(PathBuf, PathBuf)> {
 	let parent_path = match temp_icon_dir.as_ref() {
 		Some(path) => path.to_path_buf(),
-		None => {
-			dirs::runtime_dir()
-				.unwrap_or_else(std::env::temp_dir)
-				.join("tray-icon")
-		},
+		None => dirs::runtime_dir().unwrap_or_else(std::env::temp_dir).join("tray-icon"),
 	};
 
 	std::fs::create_dir_all(&parent_path)?;
-	let icon_path =
-		parent_path.join(format!("tray-icon-{}-{}.png", id, counter));
+	let icon_path = parent_path.join(format!("tray-icon-{}-{}.png", id, counter));
 	Ok((parent_path, icon_path))
 }
 
