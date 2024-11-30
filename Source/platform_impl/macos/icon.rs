@@ -23,10 +23,13 @@ impl PlatformIcon {
         {
             let mut encoder =
                 png::Encoder::new(Cursor::new(&mut png), self.0.width as _, self.0.height as _);
+
             encoder.set_color(png::ColorType::Rgba);
+
             encoder.set_depth(png::BitDepth::Eight);
 
             let mut writer = encoder.write_header()?;
+
             writer.write_image_data(&self.0.rgba)?;
         }
 

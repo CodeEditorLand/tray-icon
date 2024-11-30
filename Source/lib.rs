@@ -198,6 +198,7 @@ impl TrayIconBuilder {
     /// Sets the unique id to build the tray icon with.
     pub fn with_id<I: Into<TrayIconId>>(mut self, id: I) -> Self {
         self.id = id.into();
+
         self
     }
 
@@ -208,6 +209,7 @@ impl TrayIconBuilder {
     /// - **Linux**: once a menu is set, it cannot be removed or replaced but you can change its content.
     pub fn with_menu(mut self, menu: Box<dyn menu::ContextMenu>) -> Self {
         self.attrs.menu = Some(menu);
+
         self
     }
 
@@ -219,6 +221,7 @@ impl TrayIconBuilder {
     ///   Setting an empty [`Menu`](crate::menu::Menu) is enough.
     pub fn with_icon(mut self, icon: Icon) -> Self {
         self.attrs.icon = Some(icon);
+
         self
     }
 
@@ -229,6 +232,7 @@ impl TrayIconBuilder {
     /// - **Linux:** Unsupported.
     pub fn with_tooltip<S: AsRef<str>>(mut self, s: S) -> Self {
         self.attrs.tooltip = Some(s.as_ref().to_string());
+
         self
     }
 
@@ -244,6 +248,7 @@ impl TrayIconBuilder {
     /// - **Windows:** Unsupported.
     pub fn with_title<S: AsRef<str>>(mut self, title: S) -> Self {
         self.attrs.title.replace(title.as_ref().to_string());
+
         self
     }
 
@@ -253,18 +258,21 @@ impl TrayIconBuilder {
     /// be `$XDG_RUNTIME_DIR/tray-icon` or `$TEMP/tray-icon`.
     pub fn with_temp_dir_path<P: AsRef<Path>>(mut self, s: P) -> Self {
         self.attrs.temp_dir_path = Some(s.as_ref().to_path_buf());
+
         self
     }
 
     /// Use the icon as a [template](https://developer.apple.com/documentation/appkit/nsimage/1520017-template?language=objc). **macOS only**.
     pub fn with_icon_as_template(mut self, is_template: bool) -> Self {
         self.attrs.icon_is_template = is_template;
+
         self
     }
 
     /// Whether to show the tray menu on left click or not, default is `true`. **macOS only**.
     pub fn with_menu_on_left_click(mut self, enable: bool) -> Self {
         self.attrs.menu_on_left_click = enable;
+
         self
     }
 
@@ -298,6 +306,7 @@ impl TrayIcon {
     ///   Setting an empty [`Menu`](crate::menu::Menu) is enough.
     pub fn new(attrs: TrayIconAttributes) -> Result<Self> {
         let id = TrayIconId(COUNTER.next().to_string());
+
         Ok(Self {
             tray: Rc::new(RefCell::new(platform_impl::TrayIcon::new(
                 id.clone(),
@@ -312,6 +321,7 @@ impl TrayIcon {
     /// See [`TrayIcon::new`] for more info.
     pub fn with_id<I: Into<TrayIconId>>(id: I, attrs: TrayIconAttributes) -> Result<Self> {
         let id = id.into();
+
         Ok(Self {
             tray: Rc::new(RefCell::new(platform_impl::TrayIcon::new(
                 id.clone(),
@@ -396,7 +406,9 @@ impl TrayIcon {
         #[cfg(not(target_os = "macos"))]
         {
             let _ = icon;
+
             let _ = is_template;
+
             Ok(())
         }
     }
@@ -594,6 +606,7 @@ mod tests {
     #[test]
     fn it_serializes() {
         use super::*;
+
         let event = TrayIconEvent::Click {
             button: MouseButton::Left,
             button_state: MouseButtonState::Down,
@@ -603,6 +616,7 @@ mod tests {
         };
 
         let value = serde_json::to_value(&event).unwrap();
+
         assert_eq!(
             value,
             serde_json::json!({

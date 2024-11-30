@@ -23,7 +23,9 @@ pub struct TrayIcon {
 impl TrayIcon {
     pub fn new(_id: TrayIconId, attrs: TrayIconAttributes) -> crate::Result<Self> {
         let id = COUNTER.next();
+
         let mut indicator = AppIndicator::new("tray-icon tray app", "");
+
         indicator.set_status(AppIndicatorStatus::Active);
 
         let (parent_path, icon_path) = temp_icon_path(attrs.temp_dir_path.as_ref(), id, 0)?;
@@ -33,6 +35,7 @@ impl TrayIcon {
         }
 
         indicator.set_icon_theme_path(&parent_path.to_string_lossy());
+
         indicator.set_icon_full(&icon_path.to_string_lossy(), "icon");
 
         if let Some(menu) = &attrs.menu {
@@ -52,6 +55,7 @@ impl TrayIcon {
             menu: attrs.menu,
         })
     }
+
     pub fn set_icon(&mut self, icon: Option<Icon>) -> crate::Result<()> {
         let _ = std::fs::remove_file(&self.path);
 
@@ -66,8 +70,10 @@ impl TrayIcon {
 
         self.indicator
             .set_icon_theme_path(&parent_path.to_string_lossy());
+
         self.indicator
             .set_icon_full(&icon_path.to_string_lossy(), "tray icon");
+
         self.path = icon_path;
 
         Ok(())
@@ -77,6 +83,7 @@ impl TrayIcon {
         if let Some(menu) = &menu {
             self.indicator.set_menu(&mut menu.gtk_context_menu());
         }
+
         self.menu = menu;
     }
 
@@ -111,6 +118,7 @@ impl TrayIcon {
 impl Drop for TrayIcon {
     fn drop(&mut self) {
         self.indicator.set_status(AppIndicatorStatus::Passive);
+
         let _ = std::fs::remove_file(&self.path);
     }
 }
@@ -132,23 +140,31 @@ fn temp_icon_path(
     };
 
     std::fs::create_dir_all(&parent_path)?;
+
     let icon_path = parent_path.join(format!("tray-icon-{}-{}.png", id, counter));
+
     Ok((parent_path, icon_path))
 }
 
 #[test]
 fn temp_icon_path_preference_order() {
     let runtime_dir = option_env!("XDG_RUNTIME_DIR");
+
     let override_dir = PathBuf::from("/tmp/tao-tests");
 
     let (dir1, _file1) = temp_icon_path(Some(&override_dir), 00, 00).unwrap();
+
     let (dir2, _file1) = temp_icon_path(None, 00, 00).unwrap();
+
     std::env::remove_var("XDG_RUNTIME_DIR");
+
     let (dir3, _file2) = temp_icon_path(None, 00, 00).unwrap();
 
     assert_eq!(dir1, override_dir);
+
     if let Some(runtime_dir) = runtime_dir {
         std::env::set_var("XDG_RUNTIME_DIR", runtime_dir);
+
         assert_eq!(dir2, PathBuf::from(format!("{}/tray-icon", runtime_dir)));
     }
 

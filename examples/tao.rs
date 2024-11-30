@@ -19,6 +19,7 @@ fn main() {
 	let tray_menu = Menu::new();
 
 	let quit_i = MenuItem::new("Quit", true, None);
+
 	tray_menu.append_items(&[
 		&PredefinedMenuItem::about(
 			None,
@@ -35,6 +36,7 @@ fn main() {
 	let mut tray_icon = None;
 
 	let menu_channel = MenuEvent::receiver();
+
 	let tray_channel = TrayIconEvent::receiver();
 
 	event_loop.run(move |event, _, control_flow| {
@@ -68,6 +70,7 @@ fn main() {
 				use core_foundation::runloop::{CFRunLoopGetMain, CFRunLoopWakeUp};
 
 				let rl = CFRunLoopGetMain();
+
 				CFRunLoopWakeUp(rl);
 			}
 		}
@@ -77,6 +80,7 @@ fn main() {
 				tray_icon.take();
 				*control_flow = ControlFlow::Exit;
 			}
+
 			println!("{event:?}");
 		}
 
@@ -89,9 +93,12 @@ fn main() {
 fn load_icon(path:&std::path::Path) -> tray_icon::Icon {
 	let (icon_rgba, icon_width, icon_height) = {
 		let image = image::open(path).expect("Failed to open icon path").into_rgba8();
+
 		let (width, height) = image.dimensions();
+
 		let rgba = image.into_raw();
 		(rgba, width, height)
 	};
+
 	tray_icon::Icon::from_rgba(icon_rgba, icon_width, icon_height).expect("Failed to open icon")
 }

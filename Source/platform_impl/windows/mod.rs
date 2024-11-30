@@ -73,6 +73,7 @@ impl TrayIcon {
         let internal_id = COUNTER.next();
 
         let class_name = util::encode_wide("tray_icon_app");
+
         unsafe {
             let hinstance = util::get_instance_handle();
 
@@ -119,6 +120,7 @@ impl TrayIcon {
                 hinstance,
                 Box::into_raw(Box::new(traydata)) as _,
             );
+
             if hwnd.is_null() {
                 return Err(crate::Error::OsError(std::io::Error::last_os_error()));
             }
@@ -175,6 +177,7 @@ impl TrayIcon {
         if let Some(menu) = &self.menu {
             unsafe { menu.detach_menu_subclass_from_hwnd(self.hwnd as _) };
         }
+
         if let Some(menu) = &menu {
             unsafe { menu.attach_menu_subclass_for_hwnd(self.hwnd as _) };
         }
@@ -200,6 +203,7 @@ impl TrayIcon {
                 uID: self.internal_id,
                 ..std::mem::zeroed()
             };
+
             if let Some(tooltip) = &tooltip {
                 let tip = util::encode_wide(tooltip.as_ref());
                 #[allow(clippy::manual_memcpy)]
@@ -281,12 +285,17 @@ unsafe extern "system" fn tray_proc(
     lparam: LPARAM,
 ) -> LRESULT {
     let userdata_ptr = unsafe { util::get_window_long(hwnd, GWL_USERDATA) };
+
     let userdata_ptr = match (userdata_ptr, msg) {
         (0, WM_NCCREATE) => {
             let createstruct = unsafe { &mut *(lparam as *mut CREATESTRUCTW) };
+
             let userdata = unsafe { &mut *(createstruct.lpCreateParams as *mut TrayUserData) };
+
             userdata.hwnd = hwnd;
+
             util::set_window_long(hwnd, GWL_USERDATA, createstruct.lpCreateParams as _);
+
             return DefWindowProcW(hwnd, msg, wparam, lparam);
         }
         // Getting here should quite frankly be impossible,
@@ -302,16 +311,22 @@ unsafe extern "system" fn tray_proc(
     match msg {
         WM_DESTROY => {
             drop(Box::from_raw(userdata_ptr));
+
             return 0;
         }
+
         WM_USER_UPDATE_TRAYMENU => {
             let hpopupmenu = Box::from_raw(wparam as *mut Option<isize>);
+
             userdata.hpopupmenu = (*hpopupmenu).map(|h| h as *mut _);
         }
+
         WM_USER_UPDATE_TRAYICON => {
             let icon = Box::from_raw(wparam as *mut Option<Icon>);
+
             userdata.icon = *icon;
         }
+
         WM_USER_SHOW_TRAYICON => {
             register_tray_icon(
                 userdata.hwnd,
@@ -320,15 +335,20 @@ unsafe extern "system" fn tray_proc(
                 &userdata.tooltip,
             );
         }
+
         WM_USER_HIDE_TRAYICON => {
             remove_tray_icon(userdata.hwnd, userdata.internal_id);
         }
+
         WM_USER_UPDATE_TRAYTOOLTIP => {
             let tooltip = Box::from_raw(wparam as *mut Option<String>);
+
             userdata.tooltip = *tooltip;
         }
+
         _ if msg == *S_U_TASKBAR_RESTART => {
             remove_tray_icon(userdata.hwnd, userdata.internal_id);
+
             register_tray_icon(
                 userdata.hwnd,
                 userdata.internal_id,
@@ -336,6 +356,7 @@ unsafe extern "system" fn tray_proc(
                 &userdata.tooltip,
             );
         }
+
         WM_USER_SHOW_MENU_ON_LEFT_CLICK => {
             userdata.menu_on_left_click = wparam != 0;
         }
@@ -356,11 +377,13 @@ unsafe extern "system" fn tray_proc(
             ) =>
         {
             let mut cursor = POINT { x: 0, y: 0 };
+
             if GetCursorPos(&mut cursor as _) == 0 {
                 return 0;
             }
 
             let id = userdata.id.clone();
+
             let position = PhysicalPosition::new(cursor.x as f64, cursor.y as f64);
 
             let rect = match get_tray_rect(userdata.internal_id, hwnd) {
@@ -431,12 +454,16 @@ unsafe extern "system" fn tray_proc(
                 },
                 WM_MOUSEMOVE if !userdata.entered => {
                     userdata.entered = true;
+
                     TrayIconEvent::Enter { id, rect, position }
                 }
+
                 WM_MOUSEMOVE if userdata.entered => {
                     // handle extra WM_MOUSEMOVE events, ignore if position hasn't changed
                     let cursor_moved = userdata.last_position != Some(position);
+
                     userdata.last_position = Some(position);
+
                     if cursor_moved {
                         // Set or update existing timer, where we check if cursor left
                         SetTimer(hwnd, WM_USER_LEAVE_TIMER_ID as _, 15, Some(tray_timer_proc));
@@ -464,6 +491,7 @@ unsafe extern "system" fn tray_proc(
         WM_TIMER if wparam as u32 == WM_USER_LEAVE_TIMER_ID => {
             if let Some(position) = userdata.last_position.take() {
                 let mut cursor = POINT { x: 0, y: 0 };
+
                 if GetCursorPos(&mut cursor as _) == 0 {
                     return 0;
                 }
@@ -474,10 +502,12 @@ unsafe extern "system" fn tray_proc(
                 };
 
                 let in_x = (rect.left..rect.right).contains(&cursor.x);
+
                 let in_y = (rect.top..rect.bottom).contains(&cursor.y);
 
                 if !in_x || !in_y {
                     KillTimer(hwnd, WM_USER_LEAVE_TIMER_ID as _);
+
                     userdata.entered = false;
 
                     TrayIconEvent::send(TrayIconEvent::Leave {
@@ -506,6 +536,7 @@ unsafe fn show_tray_menu(hwnd: HWND, menu: HMENU, x: i32, y: i32) {
     // bring the hidden window to the foreground so the pop up menu
     // would automatically hide on click outside
     SetForegroundWindow(hwnd);
+
     TrackPopupMenu(
         menu,
         // align bottom / right, maybe we could expose this later..
@@ -526,16 +557,20 @@ unsafe fn register_tray_icon(
     tooltip: &Option<String>,
 ) -> bool {
     let mut h_icon = std::ptr::null_mut();
+
     let mut flags = NIF_MESSAGE;
+
     let mut sz_tip: [u16; 128] = [0; 128];
 
     if let Some(hicon) = hicon {
         flags |= NIF_ICON;
+
         h_icon = *hicon;
     }
 
     if let Some(tooltip) = tooltip {
         flags |= NIF_TIP;
+
         let tip = util::encode_wide(tooltip);
         #[allow(clippy::manual_memcpy)]
         for i in 0..tip.len().min(128) {
@@ -585,6 +620,7 @@ fn get_tray_rect(id: u32, hwnd: HWND) -> Option<RECT> {
         right: 0,
         top: 0,
     };
+
     if unsafe { Shell_NotifyIconGetRect(&nid, &mut rect) } == S_OK {
         Some(rect)
     } else {
