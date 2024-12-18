@@ -80,11 +80,10 @@
 //! 	println!("{:?}", event);
 //! }
 //! ```
-//!
+//! 
 //! You can also listen for the menu events using
 //! [`MenuEvent::receiver`](crate::menu::MenuEvent::receiver) to get events for
 //! the tray context menu.
-//!
 //! ```no_run
 //! use tray_icon::{TrayIconEvent, menu::MenuEvent};
 //!
@@ -96,14 +95,13 @@
 //! 	println!("menu event: {:?}", event);
 //! }
 //! ```
-//!
+//! 
 //! ### Note for [winit] or [tao] users:
 //!
 //! You should use [`TrayIconEvent::set_event_handler`] and forward
 //! the tray icon events to the event loop by using [`EventLoopProxy`]
 //! so that the event loop is awakened on each tray icon event.
 //! Same can be done for menu events using [`MenuEvent::set_event_handler`].
-//!
 //! ```no_run
 //! # use winit::event_loop::EventLoopBuilder;
 //! enum UserEvent {
@@ -111,7 +109,8 @@
 //! 	MenuEvent(tray_icon::menu::MenuEvent),
 //! }
 //!
-//! let event_loop = EventLoopBuilder::<UserEvent>::with_user_event().build().unwrap();
+//! let event_loop =
+//! EventLoopBuilder::<UserEvent>::with_user_event().build().unwrap();
 //!
 //! let proxy = event_loop.create_proxy();
 //! tray_icon::TrayIconEvent::set_event_handler(Some(move |event| {
@@ -123,7 +122,7 @@
 //! 	proxy.send_event(UserEvent::MenuEvent(event));
 //! }));
 //! ```
-//!
+//! 
 //! [`EventLoopProxy`]: https://docs.rs/winit/latest/winit/event_loop/struct.EventLoopProxy.html
 //! [winit]: https://docs.rs/winit
 //! [tao]: https://docs.rs/tao
